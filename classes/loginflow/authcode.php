@@ -433,13 +433,11 @@ class authcode extends \auth_azureb2c\loginflow\base {
             // Already connected user.
 
             if (empty($tokenrec->userid)) {
-                // ERROR.
-                echo 'ERROR1';die();
+                throw new \moodle_exception('errorazureb2ccall_message', 'auth_oidc', null, 'Missing token userid', '1');
             }
             $user = $DB->get_record('user', ['id' => $tokenrec->userid]);
             if (empty($user)) {
-                // ERROR.
-                echo 'ERROR2';die();
+                throw new \moodle_exception('errorazureb2ccall_message', 'auth_oidc', null, 'Failed to find user matching token userid', '1');
             }
             $username = $user->username;
             $this->updatetoken($tokenrec->id, $authparams, $tokenparams);
@@ -465,7 +463,7 @@ class authcode extends \auth_azureb2c\loginflow\base {
             $matchedwith = $this->check_for_matched($username);
             if (!empty($matchedwith)) {
                 $matchedwith->aadupn = $username;
-                throw new \moodle_exception('errorusermatched', 'local_o365', null, $matchedwith);
+                 throw new \moodle_exception('errorusermatched', 'local_o365', null, $matchedwith);
             }
             $username = trim(\core_text::strtolower($username));
             $tokenrec = $this->createtoken($azureb2cuniqid, $username, $authparams, $tokenparams, $idtoken);
@@ -477,7 +475,7 @@ class authcode extends \auth_azureb2c\loginflow\base {
                     if (!$CFG->allowaccountssameemail) {
                         $info = $this->get_userinfo($username);
                         if ($DB->count_records('user', array('email' => $info['email'], 'deleted' => 0)) > 0) {
-                            throw new moodle_exception('errorauthloginfaileddupemail', 'auth_oidc', null, null, '1'); 
+                            throw new \moodle_exception('errorauthloginfaileddupemail', 'auth_oidc', null, null, '1'); 
                         }
                     }
                     $user = create_user_record($username, null, 'azureb2c');
